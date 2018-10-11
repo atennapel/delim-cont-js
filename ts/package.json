@@ -1,0 +1,17 @@
+{
+  "name": "delim-cont-js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "runindex": "node build/src/index.js",
+    "start": "npm run build && npm run runindex"
+  },
+  "author": "aptennap@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^10.11.4",
+    "typescript": "^3.1.1"
+  }
+}
