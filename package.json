@@ -4,7 +4,7 @@
   "description": "Implementation of the delimited continuations (called \"Thermometer Continuations\") from the paper \"Capturing the Future by Replaying the Past\" in Javascript. <br/>",
   "main": "test.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node test"
   },
   "repository": {
     "type": "git",
