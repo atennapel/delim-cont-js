@@ -36,7 +36,7 @@ class Thermo {
 
     let result;
     try {
-      result = f();
+      result = f(x => this.shift(k => k(x)), x => this.shift(x));
     } catch(d) {
       if(d instanceof Done) {
         result = d.ans;
@@ -91,7 +91,7 @@ class Represent {
     return c.shift(k => this.bind(x, k));
   }
   reify(f) {
-    return this.bind(c.reset(() => this.ret(f())), this.ret);
+    return this.bind(c.reset(() => this.ret(f(x => this.reflect(x)))), this.ret);
   }
 }
 
@@ -106,22 +106,33 @@ const arrBind = (l, f) => {
   return r;
 };
 
+const delim = f => {
+  const d = new Thermo();
+  return d.reset(f);
+}
+
 // Delimited continuations
 const c = new Thermo();
 const test = 1 + c.reset(() => 2 * c.shift(k => k(10)));
 console.log(test); // 21
 
+// Simple delimited continuations
+const test_simple = 1 + delim(call => 2 * call(10));
+console.log(test_simple); // 21
+const test_simple2 = 1 + delim((_, shift) => 2 * shift(k => k(10)));
+console.log(test_simple2); // 21
+
 // Nondeterminism (List monad)
 const n = new Represent(x => [x], arrBind);
-const test2 = n.reify(() => n.reflect([1, 2, 3]) * n.reflect([4, 5, 6]));
+const test2 = n.reify($ => $([1, 2, 3]) * $([4, 5, 6]));
 console.log(test2); // [ 4, 5, 6, 8, 10, 12, 12, 15, 18 ]
 
 // Optional (Maybe monad)
 const maybeBind = (m, f) => m === null? m: f(m);
 const m = new Represent(x => x, maybeBind);
-const test3 = m.reify(() => m.reflect(3) + m.reflect(2) * m.reflect(4));
+const test3 = m.reify($ => $(3) + $(2) * $(4));
 console.log(test3); // 11
-const test4 = m.reify(() => m.reflect(3) + m.reflect(null) * m.reflect(4));
+const test4 = m.reify($ => $(3) + $(null) * $(4));
 console.log(test4); // null
 
 // Mutable state (State monad)
@@ -134,11 +145,11 @@ const get = s => [s, s];
 const put = x => s => [null, x];
 const modify = f => s => [f(s), s];
 const st = new Represent(stateRet, stateBind);
-const test5 = st.reify(() => st.reflect(get) + st.reflect(get)); // x <- get; y <- get; return x + y
+const test5 = st.reify($ => $(get) + $(get)); // x <- get; y <- get; return x + y
 console.log(test5(10)); // [ 20, 10 ]
-const test6 = st.reify(() => {
-  const x = st.reflect(get);
-  st.reflect(put(100));
-  return x + st.reflect(get);
+const test6 = st.reify($ => {
+  const x = $(get);
+  $(put(100));
+  return x + $(get);
 }); // x <- get; put 100; y <- get; return x + y
 console.log(test6(10)); // [ 110, 100 ]
