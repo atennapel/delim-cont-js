@@ -1,6 +1,6 @@
 type Cont<A, R> = (fn: (val: R) => A) => A;
 type Reset<A, R> = (f: Cont<A, R>) => R;
-type Thunk<A, R> = (f: Reset<A, R>) => A;
+type Thunk<A, R> = (f: Reset<A, R>, call: (val: R) => R) => A;
 
 class Frame<T> {}
 class Return<T> extends Frame<T> { constructor(public readonly val: T) { super() } }
@@ -31,7 +31,7 @@ export default class Thermo<A, R = A> {
 
     let result: A;
     try {
-      result = f((x: Cont<A, R>) => this.shift(x));
+      result = f((x: Cont<A, R>) => this.shift(x), x => this.shift(k => k(x)));
     } catch(d) {
       if(d instanceof Done) {
         result = d.ans as A;
