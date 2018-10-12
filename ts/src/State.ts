@@ -3,11 +3,11 @@ import { App, Monad } from './Monad';
 export type StateP<S, T> = { state: S, val: T };
 export type StateF<S, T> = (st: S) => StateP<S, T>;
 
-export type StateC<S> = typeof State;
+export type StateC<S> = { con: typeof State, arg: S };
 export type StateA<S, A> = App<StateC<S>, A>;
 export default class State<S, T> implements App<StateC<S>, T> {
 
-  readonly _con = State;
+  readonly _con = { con: State, arg: null as unknown as S };
   readonly _arg = null as unknown as T;
 
   constructor(private readonly fn: StateF<S, T>) { }
@@ -39,11 +39,10 @@ export default class State<S, T> implements App<StateC<S>, T> {
     
 }
 
-export const state = <S, A>(fn: StateF<S, A>): State<S, A> =>
-  new State(fn);
+export const state = <S, A>(fn: StateF<S, A>): State<S, A> => new State<S, A>(fn);
 
 export const StateMonad = <S>(): Monad<StateC<S>> => ({
-  ret: val => state(state => ({ state, val })),
+  ret: <S, A>(val: A) => state<S, A>(state => ({ state, val })) as App<StateC<S>, A>,
   bind: <A, B>(x: State<S, A>, fn: (val: A) => State<S, B>): State<S, B> => state((s: S) => {
     const { state, val } = x.run(s);
     return fn(val).run(state);
@@ -53,7 +52,7 @@ export const StateMonad = <S>(): Monad<StateC<S>> => ({
 export const get = <S>() =>
   state<S, S>(s => ({ state: s, val: s }));
 export const put = <S>(s: S) =>
-  state<S, S>(_ => ({ state: s, val: s }));
+  state<S, null>(_ => ({ state: s, val: null }));
 export const modify = <S>(fn: (val: S) => S) =>
   state<S, S>(s => {
     const x = fn(s);

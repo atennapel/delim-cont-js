@@ -5,7 +5,7 @@ Translated from: https://github.com/jkoppel/thermometer-continuations <br/>
 The paper: https://arxiv.org/abs/1710.10385
 
 Todo:
-* Typescript version where monads can change the return type
+* Improve type inference somehow
 * More examples
 * Implementation of algebraic effects and handlers
 
@@ -111,4 +111,18 @@ const test6 = State.from(reflect<StateC<number>, number>(StateMonad(), $ => {
   return x + $(get());
 }));
 console.log(test6.eval(10)); // 11
+
+/*
+  x <- get ();
+  y <- get ();
+  return x + y + 1
+*/
+const test7 = reflect<EffC, number>(EffMonad, $ =>
+  $(op<number>('get', {})) + $(op<number>('get', {})) + $(ret(1)));
+const handled = handle<number, number>({
+  ops: {
+    get: (v: {}, k: (val: number) => any) => k(10),
+  },
+}, test7);
+console.log(handled); // 21
 ```
