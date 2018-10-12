@@ -87,6 +87,7 @@ import { reflect } from './Monad';
 import { MaybeMonad, MaybeC, nothing, just } from './Maybe';
 import { ListMonad, ListC, list } from './List';
 import State, { StateMonad, StateC, get, put } from './State';
+import Eff, { EffMonad, EffC, ret, op, handle } from './Eff';
 
 const test = 1 + delim<number>(shift => 2 * shift(k => k(10)));
 console.log(test); // 21
