@@ -1,4 +1,4 @@
-import { App, Monad } from './Monad';
+import { App, Monad, reflect } from './Monad';
 
 export type EffC = typeof Eff;
 export type EffA<A> = App<EffC, A>;
@@ -30,8 +30,8 @@ export default abstract class Eff<T> implements App<EffC, T> {
 export class Return<T> extends Eff<T> { constructor(public readonly val: T) { super() } }
 export const ret = <T>(val: T): Eff<T> => new Return<T>(val);
 
-export class Op<T> extends Eff<T> { constructor(public readonly op: string, public readonly val: any) { super() } }
-export const op = <T>(o: string, v: any): Op<T> => new Op<T>(o, v);
+export class Op<T> extends Eff<T> { constructor(public readonly op: string, public readonly val?: any) { super() } }
+export const op = <T>(o: string, v?: any): Op<T> => new Op<T>(o, v);
 
 export class Bind<A, T> extends Eff<T> { constructor(
   public readonly c1: Eff<A>,
@@ -64,3 +64,6 @@ export const handle = <T, R>(h: Handler<T, R>, e: Eff<T> | App<EffC, T>): R => {
   }
   throw new Error('impossible');
 };
+
+export const effProgram = <T>(f: (fn: <R>(val: Eff<R>) => R) => T): Eff<T> =>
+  Eff.from(reflect<EffC, T>(EffMonad, f));

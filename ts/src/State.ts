@@ -1,4 +1,4 @@
-import { App, Monad } from './Monad';
+import { App, Monad, reflect } from './Monad';
 
 export type StateP<S, T> = { state: S, val: T };
 export type StateF<S, T> = (st: S) => StateP<S, T>;
@@ -58,3 +58,6 @@ export const modify = <S>(fn: (val: S) => S) =>
     const x = fn(s);
     return { state: x, val: x };
   });
+
+export const stateProgram = <S, T = S>(f: (fn: <R>(val: State<S, R>) => R) => T): State<S, T> =>
+  State.from(reflect<StateC<S>, T>(StateMonad<S>(), f));

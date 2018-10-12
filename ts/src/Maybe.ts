@@ -1,4 +1,4 @@
-import { App, Monad } from './Monad';
+import { App, Monad, reflect } from './Monad';
 
 export type MaybeC = typeof Maybe;
 export type MaybeA<A> = App<MaybeC, A>;
@@ -39,3 +39,6 @@ export const MaybeMonad: Monad<MaybeC> = {
   ret: just,
   bind: (val, fn) => val instanceof Just? fn(val.val): nothing(),
 };
+
+export const maybeProgram = <T>(f: (fn: <R>(val: Maybe<R>) => R) => T): Maybe<T> =>
+  Maybe.from(reflect<MaybeC, T>(MaybeMonad, f));

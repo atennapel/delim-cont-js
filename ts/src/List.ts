@@ -1,4 +1,4 @@
-import { App, Monad } from './Monad';
+import { App, Monad, reflect } from './Monad';
 
 export type ListC = typeof List;
 export type ListA<A> = App<ListC, A>;
@@ -59,3 +59,6 @@ export const ListMonad: Monad<ListC> = {
 export const listFrom = <T>(a: T[]): List<T> =>
   a.reduceRight((a, b) => cons(b, a), nil<T>());
 export const list = <T>(...a: T[]): List<T> => listFrom(a);
+
+export const listProgram = <T>(f: (fn: <R>(val: List<R>) => R) => T): List<T> =>
+  List.from(reflect<ListC, T>(ListMonad, f));
