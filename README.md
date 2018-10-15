@@ -143,4 +143,16 @@ const handled = handle<boolean, boolean>({
   },
 }, test7);
 console.log(handled); // true OR false
+
+// algebraic effects with typed operations
+type Flip = {
+  flip: Sig<null, boolean>;
+};
+const test8 = effTProgram<Flip, boolean>($ => $(opT('flip', null)));
+const handled2 = handleT<Flip, boolean, boolean>({
+  ops: {
+    flip: (v, k) => k(true),
+  },
+}, test8);
+console.log(handled2); // true
 ```
